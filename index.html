@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<!--
+    Note: Because of how this loads the dictionary,
+    it needs to be served via `python3 -m http.server 1234` rather than file://
+-->
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <title>Comma Edict</title>
+    <script src="d3.v7.min.js" defer></script>
+    <script src="utility.js" defer></script>
+    <script src="phonology.js" defer></script>
+    <style>
+    body {
+        background-color: #222;
+        color: #e9e9e9;
+        font-family: helvetica, arial;
+    }
+    .widget {
+        background-color: #1e3c46;
+        padding: 10px;
+        border-radius: 8px;
+    }
+    #column {
+        max-width:800px;
+        margin: 0 auto;
+    }
+
+    a {
+        color: #4da6ff;
+        text-decoration: none;
+    }
+
+    a:visited {
+        color: #b366ff;
+    }
+
+    a:hover, a:focus {
+        color: #80cfff;
+        text-decoration: underline;
+    }
+    </style>
+</head>
+<body>
+<div id="column">
+    <h1 style="font-size:50px">The search for the most computationally intensive rhyme</h1>
+    <a href="#rhyme-o-matic">(skip to the Rhyme-o-matic)</a>
+    <p>Rhyming in English is generally a boolean function isRhyme(word1, word2).</p>
+    <div class="widget">
+        <code>
+            isRhyme('how', 'plough') = true<br>
+            isRhyme('monkey', 'trouble') = false
+        </code>
+    </div>
+    <p>
+        This is a "perfect rhyme". One of the 22 types of English rhymes listed on <a href="https://en.wikipedia.org/wiki/Rhyme">wikipedia</a>.
+        An incredibly computationally efficient rhyme, it can be calculated in O(1) with a rhyming dictionary.
+    </p>
+    <p>Working with rhymes programatically requires representing the sounds rather than spellings of words</p>
+    <div class="widget">
+        <div>Enter a word here to see how it's represented in the International Phonetic Alphabet (IPA)</div>
+        <div style="padding: 5px;">
+            <input id="to-IPA" type="text" value="potato">
+            <span id="IPA-representation" style="padding-left: 5px;font-size: 14pt;">p ʌ t eɪ t oʊ</span>
+        </div>
+    </div>
+    <p></p>
+
+    <p></p>
+    <code>
+        isRhyme('goat', 'goat') = ?
+    </code>
+    
+    <p>>What about donkey and chunky? they're definitely closer than donkey and funky</p>
+    <div id="rhyme-o-matic" class="widget">
+        <label for="stress-matching">Stress matching:</label>
+        <select id="stress-matching" name="stress-matching">
+            <option value="require" selected>Require</option>
+            <option value="ignore">Ignore</option>
+            <option value="anti-match">Anti-match</option>
+        </select>
+        <div style="padding-top:5px">
+            <label for="stress-matching">Word to match:</label>
+            <input id="query-word" name="query-word" type="text" value="monitor">
+        </div>
+        <div id="matches" style="max-height: 400px; overflow: scroll; width: 300px;">
+    </div>
+    <p></p>
+    </div>
+    <script>
+         function populateMatches () {
+            document.getElementById('matches').scrollTop = 0 ;
+            stress = document.getElementById('stress-matching').value;
+            text = document.getElementById('query-word').value;
+            word = lookupWord(text.trim());
+            
+            if (!word) {
+                document.getElementById('matches').innerText = "Word not found";
+                return
+            }
+
+            let words = phonology.words;
+            if (stress === 'require') {
+                words = words.filter(x => x.stressSimple == word.stressSimple);
+            } else if (stress === 'anti-match') {
+                words = words.filter(x => x.stressSimple != word.stressSimple);
+            }
+
+            matches = similarWords(word, words); 
+            document.getElementById('matches').innerHTML =
+                "<table>" +
+                        matches.map(([word, similarity]) => "<tr><td>" + word + "</td><td>" + formatNumber(similarity) + "</td></tr>").join('') +
+                "</table>";
+        };
+
+        function toIPA () {
+            text = document.getElementById('to-IPA').value;
+            word = lookupWord(text.trim());
+            document.getElementById("IPA-representation").innerText = word
+                ? word.phonemes.join(' ')
+                : "Word not found";
+        }
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            await loadWords();
+            
+            toIPA();
+            document.getElementById('to-IPA').addEventListener('input', toIPA);
+
+            populateMatches();
+            document.getElementById('stress-matching').addEventListener('change', populateMatches);
+            document.getElementById('query-word').addEventListener('input', populateMatches);
+
+            
+            // TODO are the vectors correct? why is ʒ missing properties?
+            // TODO give this it's own public repo on clove tea
+            // TODO kind is matching kines with similarity 1
+            // TODO There are NaNs in the worst matches
+            // TODO add a checkbox for enforce rhyme
+            // TODO add a checkbox to match exact, start, end, or anywhere
+            // TODO Remove the most uncommon words
+           
+        });
+    </script>
+</div>
+</body>
+</html>
