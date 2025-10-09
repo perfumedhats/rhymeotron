@@ -10,6 +10,7 @@
     <script src="d3.v7.min.js" defer></script>
     <script src="utility.js" defer></script>
     <script src="phonology.js" defer></script>
+    <script src="heatmap.js" defer></script>
     <style>
     body {
         background-color: #222;
@@ -56,6 +57,7 @@
         This is a "perfect rhyme". One of the 22 types of English rhymes listed on <a href="https://en.wikipedia.org/wiki/Rhyme">wikipedia</a>.
         An incredibly computationally efficient rhyme, it can be calculated in O(1) with a rhyming dictionary.
     </p>
+    
     <p>Working with rhymes programatically requires representing the sounds rather than spellings of words</p>
     <div class="widget">
         <div>Enter a word here to see how it's represented in the International Phonetic Alphabet (IPA)</div>
@@ -64,15 +66,28 @@
             <span id="IPA-representation" style="padding-left: 5px;font-size: 14pt;">p ʌ t eɪ t oʊ</span>
         </div>
     </div>
-    <p></p>
 
-    <p></p>
-    <code>
-        isRhyme('goat', 'goat') = ?
-    </code>
-    
-    <p>>What about donkey and chunky? they're definitely closer than donkey and funky</p>
+    <p>The "rhyme" of a word, is everything including and after it's last stressed vowel</p>
+    <div class="widget">
+        <table style="border-spacing: 20px 5px; border-collapse: separate;">
+            <tr><th>Word</th><th>Onset</th><th>Rhyme</th></th></tr>
+            <tr><td>potato</td><td style="color:#999">p ʌ t</td><td>eɪ t oʊ</td></tr>
+            <tr><td>cattle</td><td style="color:#999">k</td><td>æ t ʌ l</td></tr>
+            <tr><td>elocution</td><td style="color:#999">ɛ l ʌ k</td><td>j u ʃ ʌ n</td></tr>
+        </table>
+    </div>
+
+    <p>and two words are a perfect rhyme for each other if their rhymes are identical. What about fine and vine? they're definitely closer than fine and pine.</p>
+    <p>f and v are very similar. The only difference is that your vocal chords buzz to say v, but not for f. This makes /v/ a voiced phoneme, while /f/ is unvoiced.</p>
+    <div id="heatmap-tooltip">Mouse over a cell to get the details</div>
+    <div id="heatmap"></div>
+    <p>A boolean function is much like an extremely limited distance metric.</p>
+    <p>Thus far, we've only considered phonemes, but what about stress? Consider the noun record, and the verb record. A syllable can have a primary stress, secondary stress, or be unstressed</p>
     <div id="rhyme-o-matic" class="widget">
+        <div style="padding-bottom:5px">
+            <label for="require-rhyme">Require Rhyme </label>
+            <input type="checkbox" id="require-rhyme" name="require-rhyme" value="no">
+        </div>
         <label for="stress-matching">Stress matching:</label>
         <select id="stress-matching" name="stress-matching">
             <option value="require" selected>Require</option>
@@ -85,11 +100,11 @@
         </div>
         <div id="matches" style="max-height: 400px; overflow: scroll; width: 300px;">
     </div>
-    <p></p>
     </div>
     <script>
          function populateMatches () {
             document.getElementById('matches').scrollTop = 0 ;
+            requireRhyme = document.getElementById('require-rhyme').checked;
             stress = document.getElementById('stress-matching').value;
             text = document.getElementById('query-word').value;
             word = lookupWord(text.trim());
@@ -104,6 +119,10 @@
                 words = words.filter(x => x.stressSimple == word.stressSimple);
             } else if (stress === 'anti-match') {
                 words = words.filter(x => x.stressSimple != word.stressSimple);
+            }
+
+            if (requireRhyme) {
+                words = words.filter(x => x.rhyme === word.rhyme)
             }
 
             matches = similarWords(word, words); 
@@ -124,18 +143,19 @@
         document.addEventListener('DOMContentLoaded', async () => {
             await loadWords();
             
+            drawHeatmap();
+
             toIPA();
             document.getElementById('to-IPA').addEventListener('input', toIPA);
 
             populateMatches();
+            document.getElementById('require-rhyme').addEventListener('change', populateMatches);
             document.getElementById('stress-matching').addEventListener('change', populateMatches);
             document.getElementById('query-word').addEventListener('input', populateMatches);
 
             
             // TODO are the vectors correct? why is ʒ missing properties?
-            // TODO give this it's own public repo on clove tea
-            // TODO kind is matching kines with similarity 1
-            // TODO There are NaNs in the worst matches
+    
             // TODO add a checkbox for enforce rhyme
             // TODO add a checkbox to match exact, start, end, or anywhere
             // TODO Remove the most uncommon words

@@ -5,40 +5,40 @@
 // except each dimension represents a specific feature, instead of the dimensions being generated during training. 
 // This isn't complete. Some of the IPA symbols common in english, like ɚ and ʔ, aren't represented in the pronunciation dictionary
 let phonemes =
-    "ɑ æ ʌ ɔ aʊ ə ɚ aɪ ɛ ɝ eɪ ɪ ɨ i oʊ ɔɪ ʊ u ʉ b tʃ d ð ɾ l̩ m̩ n̩ f ɡ h dʒ k l m n ŋ p ʔ ɹ s ʃ t θ v w ʍ j z ʒ".split(' ');
+    "ɑ æ ʌ ɔ aʊ ə ɚ aɪ ɛ ɝ eɪ ɪ ɨ i oʊ ɔɪ ʊ u b tʃ d ð ɾ l̩ m̩ n̩ f ɡ h dʒ k l m n ŋ p ʔ ɹ s ʃ t θ v w ʍ j z ʒ".split(' ');
 
 // Some vectors should be worth more than others. The difference between a plosive and continuant seems more significant than front vs back.
 let properties = [
     // General
-    "- + - - +  - - +  - - +  - - - +  +  - - - - -  - - - - - - - - - -  - - - - - - - - - - - - - - - - - -", // dipthong
-    "+ + + + +  + + +  + + +  + + + +  +  + + + - -  - - - + + + - - - -  - + + + - - - + - - - - - + - + - -", // sonorant
-    "+ + + + +  + + +  + + +  + + + +  +  + + + + -  + + + + + + - + - +  - + + + + - - + - - - + + + - + + +", // voice
-    "- - - - -  - + -  - + -  - - - -  -  - - - - -  - - - - - - - - - -  - - - - - - - + - - - - - - - - - -", // rhotic
+    "- + - - +  - - +  - - +  - - - +  +  - - - -  - - - - - - - - - -  - - - - - - - - - - - - - - - - - -", // dipthong
+    "+ + + + +  + + +  + + +  + + + +  +  + + - -  - - - + + + - - - -  - + + + - - - + - - - - - + - + - -", // sonorant
+    "+ + + + +  + + +  + + +  + + + +  +  + + + -  + + + + + + - + - +  - + + + + - - + - - - - + + - + + +", // voice
+    "- - - - -  - + -  - + -  - - - -  -  - - - -  - - - - - - - - - -  - - - - - - - + - - - - - - - - - -", // rhotic
 
     // Place of articulation
     // subcategoriest could be added https://en.wikipedia.org/wiki/Place_of_articulation
-    "- - - + +  - - -  - - -  - - - +  x  + + + + -  - - - - + - + - - -  - - + - - + - - - - - - + - - - - -", // labial
-    "- - - - -  - - -  - - -  - - - -  -  - - - - +  + + + + - + - - - +  - + - + - - - + + + + + - - - - + +", // coronal
-    "+ + + + +  + + +  + + +  + + + +  +  + + + - -  - - - - - - - + + -  + - - - + - - - - - - - - + + + - -", // dorsal
+    "- - - + +  - - -  - - -  - - - +  x  + + + -  - - - - + - + - - -  - - + - - + - - - - - - + + - - - -", // labial
+    "- - - - -  - - -  - - -  - - - -  -  - - - +  + + + + - + - - - +  - + - + - - - + + + + + - - - - + +", // coronal
+    "+ + + + +  + + +  + + +  + + + +  +  + + - -  - - - - - - - + + -  + - - - + - - - - - - - - + + + - -", // dorsal
 
     // // Consonant exclusive (airflow)
-    // "- - - - -  - - -  - - -  - - - -  -  - - - - +  - - - - - - - - - +  - - - - - - - - - - - - - - - - - -", // plosive
-    // "- - - - -  - - -  - - -  - - - -  -  - - - + -  + - - - - - - + - +  + - - - - + + - - - + - - - - - - -", // affricative
-    "- - - - -  - - -  - - -  - - - -  -  - - - p a  p - - - - - - p - a  p - - - - p p - - - p - - - - - - -", // plosive or affricative. Combined since they're mutually exclusive
-    "- - - - -  - - -  - - -  - - - -  -  - - - - +  - + - - - - + - - -  - - - - - - - - + + - + + - + - + +", // fricative
-    "- - - - -  - - -  - - -  - - - -  -  - - - - -  - - - - + + - - - -  - - + + - - - - - - - - - - - - - -", // nasal
+    "- - - - -  - - -  - - -  - - - -  -  - - - +  - - - - - - - - - +  - - - - - - - - - - - - - - - - - -", // plosive
+    "- - - - -  - - -  - - -  - - - -  -  - - + -  + - - - - - - + - +  + - - - - + + - - - + - - - - - - -", // affricative
+    "- - - - -  - - -  - - -  - - - -  -  - - p a  p - - - - - - p - a  p - - - - p p - - - p - - - - - - -", // plosive or affricative. Combined since they're mutually exclusive
+    "- - - - -  - - -  - - -  - - - -  -  - - - +  - + - - - - + - - -  - - - - - - - - + + - + + - + - + +", // fricative
+    "- - - - -  - - -  - - -  - - - -  -  - - - -  - - - - + + - - - -  - - + + - - - - - - - - - - - - - -", // nasal
 
     // Vowel exclusive
-    "- - - + +  - - -  - - -  - - - +  x  + + + X X  X X X X X X X X X X  X X X X X X X X X X X X X X X X X X", // round
-    "- - - - x  - - x  - - x  + + + x  x  + + + X X  X X X X X X X X X X  X X X X X X X X X X X X X X X X X X", // high
-    "+ + - - x  - - x  - - -  - - - -  -  - - - X X  X X X X X X X X X X  X X X X X X X X X X X X X X X X X X", // low
-    "+ - + + +  + + x  - + -  - + - +  x  + + + X X  X X X X X X X X X X  X X X X X X X X X X X X X X X X X X", // back
-    "+ - - + +  r r +  - + +  - r + +  +  - + + X X  X X X X X X X X X X  X X X X X X X X X X X X X X X X X X", // tense (r for reduced)
+    "- - - + +  - - -  - - -  - - - +  x  + + X X  X X X X X X X X X X  X X X X X X X X X + X X X + + X X +", // round (or partially in the case of ʃ and ʒ)
+    "- - - - x  - - x  - - x  + + + x  x  + + X X  X X X X X X X X X X  X X X X X X X X X X X X X X X X X X", // high
+    "+ + - - x  - - x  - - -  - - - -  -  - - X X  X X X X X X X X X X  X X X X X X X X X X X X X X X X X X", // low
+    "+ - + + +  + + x  - + -  - + - +  x  + + X X  X X X X X X X X X X  X X X X X X X X X X X X X X X X X X", // back
+    "+ - - + +  r r +  - + +  - r + +  +  - + X X  X X X X X X X X X X  X X X X X X X X X X X X X X X X X X", // tense (r for reduced)
     
 
     // These would duplicate other fields, so are omitted
-    // "- - - - -  - - -  - - -  - - - -  -  - - - + +  + + + + + + + + - +  + + + + + + + + + + + + + + + + + +", // consonantal
-    // "+ + + + +  + + +  + + +  + + + +  +  + + + - -  - - - - - - - - - -  - - - - - - - - - - - - - - - - - -", // vowel
+    // "- - - - -  - - -  - - -  - - - -  -  - - + +  + + + + + + + + - +  + + + + + + + + + + + + + + + + + +", // consonantal
+    // "+ + + + +  + + +  + + +  + + + +  +  + + - -  - - - - - - - - - -  - - - - - - - - - - - - - - - - - -", // vowel
     ].map(x=>x.replace(/ /g,''));
 
 // Flip properties to be a vector for each phoneme
@@ -56,6 +56,57 @@ const lookup = Object.fromEntries(Object.entries(vectors).map(function ([IPA, ve
     return [IPA, similarities]
 }))
 
+IPADescription = {
+    "ɑ":  "a as in calm",
+    "æ":  "a as in bat",
+    "ʌ":  "u as in bluff",
+    "ɔ":  "a as in all",
+    "aʊ": "ou as in bout",
+    "ə":  "a as in about",
+    "ɚ":  "er as in letter",
+    "aɪ": "i as in bite",
+    "ɛ":  "e as in bet",
+    "ɝ":  "ir as in mirth",
+    "eɪ": "a as in face",
+    "ɪ":  "i as in bit",
+    "ɨ":  "u as in rude",
+    "i":  "ea as in beat",
+    "oʊ": "oa as in boat",
+    "ɔɪ": "oy as in boy",
+    "ʊ":  "oo as in book",
+    "u":  "oo as in boot",
+    // "ʉ":  "u as in dude", // Unused
+    "b":  "b as in buy",
+    "tʃ": "ch as in chain",
+    "d":  "d as in dog",
+    "ð":  "th as in those",
+    "ɾ":  "r as in butter",
+    "l̩":  "l as in bottle",
+    "m̩":  "m as in rhythm",
+    "n̩":  "n as in button",
+    "f":  "f as in fight",
+    "ɡ":  "g as in goose",
+    "h":  "h as in hat",
+    "dʒ": "j as in jury",
+    "k":  "k as in kite",
+    "l":  "l as in lie",
+    "m":  "m as in my",
+    "n":  "n as in night",
+    "ŋ":  "ng as in sing",
+    "p":  "p as in pen",
+    "ʔ":  "the pause in uh-oh",
+    "ɹ":  "r as in rye",
+    "s":  "s as in sigh",
+    "ʃ":  "sh as in shine",
+    "t":  "t as in tie",
+    "θ":  "th as in thick",
+    "v":  "v as in vote",
+    "w":  "w as in wise",
+    "ʍ":  "wh as in why",
+    "j":  "y as in yacht",
+    "z":  "z as in zoo",
+    "ʒ":  "s as in pleasure"
+}
 
 arpabetToIP = {
     "AA":  "ɑ",   // balm, bot
@@ -76,7 +127,7 @@ arpabetToIP = {
     "OY":  "ɔɪ",  // boy
     "UH":  "ʊ",   // book
     "UW":  "u",   // boot
-    "UX":  "ʉ",   // dude
+    // "UX":  "ʉ",   // dude Unused
     "B":   "b",   // buy
     "CH":  "tʃ",  // China
     "D":   "d",   // die
@@ -127,25 +178,28 @@ async function loadWords() {
 
     phonology.words = lines.map(function (line) {
         line = line.split(" ");
-        word = line[0];
-        phonemesAndStresses = line.slice(1);
-        stress = phonemesAndStresses.map(function (x) {
+        const word = line[0];
+        const phonemesAndStresses = line.slice(1);
+        const stress = phonemesAndStresses.map(function (x) {
             let lastChar = x.at(-1);
             return "012".includes(lastChar) ? lastChar : "-";
         });
 
-        phonemes = phonemesAndStresses
+        const phonemes = phonemesAndStresses
             .map(x=>x.replace(/[012]$/,''))
             .map(x=>arpabetToIP[x]);
 
         // These get joined together so the stress of different words can be compared for equality quickly
-        stressSimple = stress.filter(x=> x != "-").join('')
+        const stressSimple = stress.filter(x=> x != "-").join('');
+
+        const rhyme = phonemes.slice(stress.lastIndexOf("1")).join('');
 
         return {
             "word": word,
             "phonemes": phonemes,
             "stress": stress, 
-            "stressSimple": stressSimple
+            "stressSimple": stressSimple,
+            "rhyme": rhyme,
         }
     })
 

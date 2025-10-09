@@ -27,16 +27,15 @@ function lookupWord (target) {
 
 function compareWords (word1, word2) {
     // TODO compare average with harmonic mean
-    return average(word1.phonemes.map((x,i)=>lookup[x][word2.phonemes[i]]))
+    range = -1 * Math.min(word1.phonemes.length, word2.phonemes.length);
+    phonemes1 = word1.phonemes.slice(range);
+    phonemes2 = word2.phonemes.slice(range);
+    return average(phonemes1.map((x,i)=>lookup[x][phonemes2[i]]));
 }
 
 // Return words sorted by overall similarity
-// Only works on targets that are the same length
-// we it to work for words that are different lengths
 function similarWords (target, words) {
-    length = target.phonemes.length;
-    potential = words.filter(x => x.phonemes.length == length);
-    return potential.map(x=>[x.word, compareWords(target, x)]).sort((x,y) => y[1] - x[1]);
+    return words.map(x=>[x.word, compareWords(target, x)]).sort((x,y) => y[1] - x[1]);
 }
 
 function throttle(fn, limit) {
