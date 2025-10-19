@@ -216,3 +216,19 @@ async function loadWords() {
         throw new Error(`Failed to load word list: ${response.status} ${response.statusText}`);
     }
 }
+
+async function loadGlove() {
+    const res = await fetch("short-glove.txt");
+    const text = await res.text();
+    lines = text.split('\n');
+    window.glove = Object.fromEntries(
+        lines.map(function (line) {
+            const entries = line.split(' ');
+            const word = entries[0];
+            const vector = entries.slice(1).map(x=>parseFloat(x));
+            // This is used for each cosine similarity calculation, so it can be cached
+            const magnitude = Math.sqrt(vector.reduce((acc, x)=> acc + x * x, 0));
+            return [word, {"vector": vector, "magnitude": magnitude}];
+        })
+    );
+}

@@ -18,9 +18,32 @@ function showPerfectRhymes() {
 
 function populateMatches () {
     document.getElementById('matches').scrollTop = 0 ;
-    requireRhyme = document.getElementById('require-rhyme').checked;
-    stress = document.getElementById('stress-matching').value;
-    text = document.getElementById('query-word').value.toLowerCase().trim();
+    const requireRhyme = document.getElementById('require-rhyme').checked;
+    const stress = document.getElementById('stress-matching').value;
+    const text = document.getElementById('query-word').value.toLowerCase().trim();
+    const semanticWeight = parseFloat(document.getElementById('semantic-weight').value);
+
+    let complexity = {"1": 0, "n * m": 0, "n * d": 0};
+    complexity["1"] += requireRhyme;
+    complexity["1"] += stress !== "ignore";
+    // Fuzzy rhyming happens unless the search is fully semantic
+    complexity["n * m"] += semanticWeight !== 1;
+    // Semantic search happens unless the weight is 0
+    complexity["n * d"] += semanticWeight !== 0;
+
+    let complexitySummary = [];
+    if (complexity["1"]) {
+        complexitySummary.push(complexity["1"]);
+    }
+    if (complexity["n * m"]) {
+        complexitySummary.push("n * m");
+    }
+    if (complexity["n * d"]) {
+        complexitySummary.push("n * d");
+    }
+    
+    document.getElementById('complexity').innerText = complexitySummary.join(' + ');
+
     word = lookupWord(text);
     
     if (!word) {
@@ -39,7 +62,7 @@ function populateMatches () {
         words = words.filter(x => x.rhyme === word.rhyme)
     }
 
-    matches = similarWords(word, words); 
+    matches = similarWords(word, words, semanticWeight); 
     document.getElementById('matches').innerHTML =
         "<table>" +
                 matches.map(([word, similarity]) => "<tr><td>" + word + "</td><td>" + formatNumber(similarity) + "</td></tr>").join('') +
@@ -88,4 +111,24 @@ function toStress() {
     stressVisual.appendChild(table);
 
     stressMatches.innerText = phonology.words.filter(x=>x.stress === word.stress).map(x=>x.word).join(", ");
+}
+
+function semanticMatches () {
+    const text = document.getElementById('semantic-lookup').value.toLowerCase().trim();
+    const semanticMatches = document.getElementById('semantic-matches');
+    const target = glove[text];
+    if (!target || text === '') {
+        semanticMatches.innerText = "Word not found";
+        return;
+    }
+
+    let scores = Object.entries(glove).map(function ([word, embedding]) {
+        return [word, cosineSimilarity(target, embedding)]
+    });
+    scores = scores.sort((x,y)=>y[1] - x[1]).slice(0, 100);
+    semanticMatches.innerHTML =
+    "<table>" +
+            scores.map(([word, similarity]) => "<tr><td>" + word + "</td><td>" + formatNumber(similarity) + "</td></tr>").join('') +
+    "</table>";
+
 }

@@ -6,7 +6,7 @@
 -->
 
 <!--
-    Note: Because of how this loads the dictionary,
+    Note: Because of how this loads the reference files,
     it needs to be served via `python3 -m http.server 1234` rather than file://
 -->
 <html lang="en">
@@ -19,22 +19,25 @@
     <script src="heatmap.js" defer></script>
     <script src="event-handlers.js" defer></script>
     <link rel="stylesheet" href="style.css">
+
+    <link rel="icon" type="image/png" sizes="32x32" href="icons/quill32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="icons/quill16.png">
 </head>
 <body>
 <div id="column">
     <h1 style="font-size:50px">The search for the most computationally intensive rhyme</h1>
-    <a href="#rhyme-o-matic">(skip to the Rhyme-o-matic)</a>
+    <h4>Benjamin Jeffery, 2025</h4>
     <h3>The Perfect Rhyme, O(1)</h3>
-    <p>Rhyming in English is generally a boolean function</p>
+    <p>Rhyming in English is generally a boolean function.</p>
     <div class="widget">
         <code>
-            isRhyme('how', 'plough') = true<br>
-            isRhyme('monkey', 'trouble') = false
+            isRhyme('gnome', 'home') = true<br>
+            isRhyme('hobbit', 'adventure') = false
         </code>
     </div>
     <p>
         This is a "perfect rhyme", one of the 22 types of English rhymes listed on <a href="https://en.wikipedia.org/wiki/Rhyme">wikipedia</a>.
-        An incredibly computationally efficient rhyme, it can be calculated in O(1), as follows.
+        An incredibly computationally efficient rhyme, it can be calculated in O(1) as follows.
     </p>
     
     <p>First, we need a representation of the sounds of words, rather than their spelling. By far the most common is the International Phonetic Alphbet (IPA).</p>
@@ -46,17 +49,17 @@
         </div>
     </div>
 
-    <p>The "rhyme" of a word, is everything including and after it's last stressed vowel</p>
+    <p>The "rhyme" of a word, is everything including and after it's last stressed vowel.</p>
     <div class="widget">
         <table style="border-spacing: 20px 5px; border-collapse: separate; margin-left: -20px">
             <tr><th>Word</th><th>Onset</th><th>Rhyme</th></th></tr>
-            <tr><td>potato</td><td style="color:#CCC">p ʌ t</td><td>eɪ t oʊ</td></tr>
-            <tr><td>cattle</td><td style="color:#CCC">k</td><td>æ t ʌ l</td></tr>
-            <tr><td>elocution</td><td style="color:#CCC">ɛ l ʌ k</td><td>j u ʃ ʌ n</td></tr>
+            <tr><td>potato</td><td>p ʌ t</td><td>eɪ t oʊ</td></tr>
+            <tr><td>dragon</td><td>d ɹ</td><td>æ ɡ ʌ n</td></tr>
+            <tr><td>overcome</td><td>oʊ v ɝ k</td><td>ʌ m</td></tr>
         </table>
     </div>
 
-    <p>and two words are a perfect rhyme for each other if their rhymes are identical. O(1) is achievable by creating a map of all words to their rhymes, then comparing the rhymes of any two words. A "rhyming dictionary" instead is a mapping from rhymes to all words having that rhyme.<p>
+    <p>and two words form a perfect rhyme if their rhymes are identical. As we can precompute the rhyme of each word, and as JavaScript engines do string interning, this comparison is O(1). A "rhyming dictionary", a precomputed map of all words sharing a rhyme, allows finding <strong>all</strong> rhyming words in O(1).<p>
     <div class="widget">
         <div>Enter a word here to see all its perfect rhymes</div>
         <div style="padding: 5px;">
@@ -65,49 +68,28 @@
         </div>
     </div>
 
-    <h3>The Fuzzy Rhyme, O(n * 2m)</h3></h2>
-    <p> What about fine and vine? they're definitely closer than fine and pine.</p>
-    <p>f and v are very similar. The only difference is that your vocal chords buzz to say v, but not for f. Using the convention of writing IPA symbols in slashes, we'd say that /v/ a voiced phoneme, while /f/ is unvoiced.</p>
+    <h3>The Near Rhyme, O(n * m)</h3></h2>
+    <p> What about fine and vine? They're definitely closer than fine and pine.</p>
+    <p>f and v are very similar. The only difference is that your vocal chords buzz to say v, but not for f. Using the convention of writing IPA symbols in slashes, we'd say that <code>/v/</code> is a voiced phoneme, while <code>/f/</code> is unvoiced.</p>
+    <p>If we make a table showing the features of each phoneme, we can see how similar individual phonemes are.</p>
     <div class="widget">
-        <table id="phonemeTable">
-            <thead>
-                <tr>
-                <th>Property</th>
-                <th>ɑ</th><th>æ</th><th>ʌ</th><th>ɔ</th><th>aʊ</th><th>ə</th><th>ɚ</th><th>aɪ</th>
-                <th>ɛ</th><th>ɝ</th><th>eɪ</th><th>ɪ</th><th>ɨ</th><th>i</th><th>oʊ</th><th>ɔɪ</th>
-                <th>ʊ</th><th>u</th><th>b</th><th>tʃ</th><th>d</th><th>ð</th><th>ɾ</th><th>l̩</th>
-                <th>m̩</th><th>n̩</th><th>f</th><th>ɡ</th><th>h</th><th>dʒ</th><th>k</th><th>l</th>
-                <th>m</th><th>n</th><th>ŋ</th><th>p</th><th>ʔ</th><th>ɹ</th><th>s</th><th>ʃ</th>
-                <th>t</th><th>θ</th><th>v</th><th>w</th><th>ʍ</th><th>j</th><th>z</th><th>ʒ</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr><td>dipthong</td><td>-</td><td>+</td><td>-</td><td>-</td><td>+</td><td>-</td><td>-</td><td>+</td><td>-</td><td>-</td><td>+</td><td>-</td><td>-</td><td>-</td><td>+</td><td>+</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td></tr>
-                <tr><td>sonorant</td><td>+</td><td>+</td><td>+</td><td>+</td><td>+</td><td>+</td><td>+</td><td>+</td><td>+</td><td>+</td><td>+</td><td>+</td><td>+</td><td>+</td><td>+</td><td>+</td><td>+</td><td>+</td><td>-</td><td>-</td><td>-</td><td>-</td><td>+</td><td>+</td><td>+</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>+</td><td>+</td><td>+</td><td>+</td><td>-</td><td>-</td><td>+</td><td>+</td><td>+</td><td>-</td><td>-</td><td>-</td><td>+</td><td>-</td><td>+</td><td>-</td><td>-</td></tr>
-                <tr><td>voice</td><td>+</td><td>+</td><td>+</td><td>+</td><td>+</td><td>+</td><td>+</td><td>+</td><td>+</td><td>+</td><td>+</td><td>+</td><td>+</td><td>+</td><td>+</td><td>+</td><td>+</td><td>+</td><td>+</td><td>-</td><td>+</td><td>+</td><td>+</td><td>+</td><td>+</td><td>-</td><td>+</td><td>-</td><td>+</td><td>-</td><td>+</td><td>+</td><td>-</td><td>+</td><td>-</td><td>+</td><td>+</td><td>+</td><td>+</td><td>-</td><td>-</td><td>+</td><td>+</td><td>-</td><td>+</td><td>+</td><td>+</td></tr>
-                <tr><td>rhotic</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>+</td><td>-</td><td>-</td><td>+</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>+</td><td>-</td><td>-</td><td>-</td><td>-</td></tr>
-                <tr><td>labial</td><td>-</td><td>-</td><td>-</td><td>+</td><td>+</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>+</td><td>+</td><td>-</td><td>-</td><td>-</td><td>-</td><td>+</td><td>-</td><td>+</td><td>-</td><td>-</td><td>-</td><td>+</td><td>+</td><td>+</td><td>-</td><td>+</td><td>-</td><td>-</td><td>+</td><td>+</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>+</td><td>+</td><td>-</td><td>-</td></tr>
-                <tr><td>coronal</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>+</td><td>+</td><td>+</td><td>+</td><td>-</td><td>+</td><td>-</td><td>-</td><td>+</td><td>-</td><td>+</td><td>-</td><td>+</td><td>-</td><td>-</td><td>+</td><td>+</td><td>+</td><td>+</td><td>-</td><td>-</td><td>-</td><td>-</td><td>+</td><td>+</td><td>-</td><td>-</td><td>-</td><td>-</td><td>+</td><td>+</td></tr>
-                <tr><td>dorsal</td><td>+</td><td>+</td><td>+</td><td>+</td><td>+</td><td>+</td><td>+</td><td>+</td><td>+</td><td>+</td><td>+</td><td>+</td><td>+</td><td>+</td><td>+</td><td>+</td><td>+</td><td>+</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>+</td><td>+</td><td>-</td><td>+</td><td>-</td><td>+</td><td>-</td><td>+</td><td>+</td><td>-</td><td>+</td><td>-</td><td>+</td><td>+</td><td>+</td><td>+</td><td>+</td><td>-</td><td>-</td><td>+</td><td>+</td><td>+</td><td>-</td><td>-</td></tr>
-                <tr><td>plosive</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>+</td><td>-</td><td>-</td><td>-</td><td>-</td><td>+</td><td>-</td><td>-</td><td>+</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>+</td><td>-</td><td>+</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td></tr>
-                <tr><td>affricative</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>+</td><td>-</td><td>+</td><td>-</td><td>+</td><td>-</td><td>-</td><td>+</td><td>-</td><td>+</td><td>-</td><td>-</td><td>+</td><td>+</td><td>+</td><td>+</td><td>-</td><td>+</td><td>+</td><td>+</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>+</td><td>+</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td></tr>
-                <tr><td>plosive/affricative</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>p</td><td>a</td><td>p</td><td>-</td><td>p</td><td>-</td><td>-</td><td>p</td><td>-</td><td>a</td><td>p</td><td>-</td><td>p</td><td>-</td><td>p</td><td>p</td><td>-</td><td>p</td><td>p</td><td>-</td><td>-</td><td>-</td><td>p</td><td>p</td><td>-</td><td>p</td><td>-</td><td>p</td><td>p</td><td>-</td><td>-</td><td>-</td></tr>
-                <tr><td>fricative</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>+</td><td>-</td><td>+</td><td>-</td><td>+</td><td>-</td><td>-</td><td>-</td><td>+</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>+</td><td>-</td><td>-</td><td>+</td><td>+</td><td>-</td><td>+</td><td>-</td><td>+</td><td>+</td><td>+</td><td>-</td><td>+</td><td>+</td><td>-</td><td>+</td><td>+</td></tr>
-                <tr><td>nasal</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>+</td><td>+</td><td>-</td><td>-</td><td>-</td><td>-</td><td>+</td><td>+</td><td>-</td><td>+</td><td>+</td><td>-</td><td>+</td><td>+</td><td>+</td><td>+</td><td>-</td><td>-</td><td>-</td><td>+</td><td>+</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td></tr>
-                <tr><td colspan="40"><strong>Vowel properties</strong></td></tr>
-                <tr><td>round</td><td>-</td><td>-</td><td>-</td><td>+</td><td>+</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>+</td><td>+</td><td>X</td><td>X</td><td>X</td><td>X</td><td>X</td><td>X</td><td>X</td><td>X</td><td>X</td><td>X</td><td>X</td><td>X</td><td>X</td><td>X</td><td>X</td><td>X</td><td>+</td><td>X</td><td>X</td><td>X</td><td>+</td><td>+</td><td>X</td><td>X</td><td>+</td><td>X</td><td>X</td><td>X</td><td>+</td><td>+</td><td>X</td><td>X</td><td>+</td></tr>
-                <tr><td>high</td><td>-</td><td>-</td><td>-</td><td>-</td><td>x</td><td>-</td><td>-</td><td>x</td><td>-</td><td>-</td><td>x</td><td>+</td><td>+</td><td>+</td><td>x</td><td>x</td><td>+</td><td>+</td><td>X</td><td>X</td><td>X</td><td>X</td><td>X</td><td>X</td><td>X</td><td>X</td><td>X</td><td>X</td><td>X</td><td>X</td><td>X</td><td>X</td><td>X</td><td>X</td><td>X</td><td>X</td><td>X</td><td>X</td><td>X</td><td>X</td><td>X</td><td>X</td><td>X</td><td>X</td><td>X</td><td>X</td><td>X</td></tr>
-                <tr><td>low</td><td>+</td><td>+</td><td>-</td><td>-</td><td>x</td><td>-</td><td>-</td><td>x</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>X</td><td>X</td><td>X</td><td>X</td><td>X</td><td>X</td><td>X</td><td>X</td><td>X</td><td>X</td><td>X</td><td>X</td><td>X</td><td>X</td><td>X</td><td>X</td><td>X</td><td>X</td><td>X</td><td>X</td><td>X</td><td>X</td><td>X</td><td>X</td><td>X</td><td>X</td><td>X</td><td>X</td><td>X</td></tr>
-                <tr><td>back</td><td>+</td><td>-</td><td>+</td><td>+</td><td>+</td><td>+</td><td>+</td><td>x</td><td>-</td><td>+</td><td>-</td><td>-</td><td>+</td><td>-</td><td>+</td><td>x</td><td>+</td><td>+</td><td>X</td><td>X</td><td>X</td><td>X</td><td>X</td><td>X</td><td>X</td><td>X</td><td>X</td><td>X</td><td>X</td><td>X</td><td>X</td><td>X</td><td>X</td><td>X</td><td>X</td><td>X</td><td>X</td><td>X</td><td>X</td><td>X</td><td>X</td><td>X</td><td>X</td><td>X</td><td>X</td><td>X</td><td>X</td></tr>
-                <tr><td>tense</td><td>+</td><td>-</td><td>-</td><td>+</td><td>+</td><td>r</td><td>r</td><td>+</td><td>-</td><td>+</td><td>+</td><td>-</td><td>r</td><td>+</td><td>+</td><td>+</td><td>-</td><td>+</td><td>X</td><td>X</td><td>X</td><td>X</td><td>X</td><td>X</td><td>X</td><td>X</td><td>X</td><td>X</td><td>X</td><td>X</td><td>X</td><td>X</td><td>X</td><td>X</td><td>X</td><td>X</td><td>X</td><td>X</td><td>X</td><td>X</td><td>X</td><td>X</td><td>X</td><td>X</td><td>X</td><td>X</td></tr>
-            </tbody>
-        </table>
+        <table id="phonemeTable"></table>
+        <div style="font-size: 10pt; color: #ccc; margin-top: 3px;">
+            + indicates the presence of an attribute, - indicates the absence, X indicates the attribute is not applicable, and r indicates reduced.
+        </div>
     </div>
-
-    <div id="heatmap-tooltip">Mouse over a cell to get the details</div>
-    <div id="heatmap"></div>
-    <p>A boolean function is much like an extremely limited distance metric.</p>
-    <p>Thus far, we've only considered phonemes, but what about stress? Consider the noun record, and the verb record. REcord rhymes with CONcord, but reCORD doesn't. A syllable can have a primary stress (1), secondary stress (2), or be unstressed (0). Only vowels have stress. Taking this a step further, lets match stress patterns on phonemes instead of syllables (as that option isn't readily available online yet).</p>
+    <p>The above table involved some design choices. Not all attributes are shown. There's no attribute explicitly for distinguishing consonants and vowels, since other attibutes already carry that information. Also, the "manner" of articulation (plosive, affricative, fricative, nasal) could be represented as a categorical variable, but for clarity I've used a "one-hot encoding" where a categorical variable is represented as a set of boolean vectors. Since all vectors are equally weighted, this effectively adds extra weight to the manner of articulation.</p>
+    <p>The following heatmap shows how similar every pair is. The two large clusters are vowels and consonants.</p>
+    <div class="widget">
+        <div id="heatmap-tooltip">Mouse over a cell to get the details here.</div>
+        <div id="heatmap"></div>
+    </div>
+    <p>This chart also shows how <code>/j/</code> and <code>/w/</code>, the semivowels, sit in between vowels and consonants.</p>
+    <p>To calculate find all near rhymes, we need to compare each pair of phonemes between each pair of words, making this rhyme O(n&nbsp;*&nbsp;m), where n is the number of words in our dictionary, and m is the mean number of phonemes in a word.</p>
+    <p>This also means the result isn't a boolean, but a distance that we can normalize to [0,1].</p>
+    <p>Because there are only 48 phonemes in our dataset, we can precompute all the comparisons using only <code>48² * 64B = 144 KiB.</code></p>
+    <h3>Word stress, O(1)</h3>
+    <p>Thus far, we've only considered phonemes, but what about stress? CONcord rhymes with the noun REcord, but not the verb reCORD. A syllable can have a primary stress (1), secondary stress (2), or be unstressed (0). Only vowels have stress. Taking this a step further, lets match stress patterns on phonemes instead of syllables (as that option isn't readily available online yet).</p>
     <div class="widget">
         <div>Enter a word here to see its stress pattern and matches.</div>
         <div style="padding: 5px;">
@@ -116,31 +98,67 @@
             <div id="stress-matches"></div>
         </div>
     </div>
-    <br>
-    <div>The Rhymeotron</div>
+    <p>A map of stress patterns to maps allows finding all matching words in O(1).</p>
+    <h3>Semantic Rhymes, O(n * d)</h3>
+    <p>Some words have an overlap semantically rather than phonetically. Examples include pie and tart, or ship and boat. Some words overlap semantically and phonetically, like canted and slanted.</p>
+    <p>To measure the distance between words semantically, we need "embeddings". These are similar to our phoneme feature vectors, but instead of corrsponding to specific features, the meanings of the dimensions are generated by deep neural networks. The embeddings are trained such that we can find the similarity of two words by comparing the angle between their vectors.</p>
+    <div class="widget"> 
+        <div>Enter a word here to find the 100 most similar words</div>
+        <div style="padding: 5px;">
+            <input id="semantic-lookup" type="text" value="computer" oninput="semanticMatches(event)">
+            <div id="semantic-matches" style="height: 400px; overflow: scroll; width: 300px;"></div>
+        </div>
+    </div>
+
+    <p>Unlike OpenAI's 3072-dimension embeddings, this uses bandwidth-friendly embeddings with only 25 dimensions per word. Thanks to the Pareto principle, this is enough to find similar words.</p>
+    <p>This dataset was trained on Twitter, and words that occur frequently in the data (like "job") are well represented even in 25 dimensions, while less frequent words will give unexpected results (e.g. The second closest word to electron is wheelbarrow.)</p>
     
-    <div id="rhyme-o-matic" class="widget">
-        <div style="padding-bottom:5px">
-            <label for="require-rhyme">Require Rhyme </label>
+    <p>A lookup table for the 52,392 embeddings would use a prohibitive 52,392² * 64B = 164 GiB, so we'll need to do the O(n * d) comparison each time, where n is the number of embeddings, and d is the number of dimensions.</p>
+    <h2>The Rhymeotron</h2>
+    <p>Good words for testing semantic rhymes include cabbage, cabin, dance, boot, and oil.<br>
+        Note that finding good semantic matches usually requires disabling "Perfect Rhyme".
+    </p>
+    
+    <div id="rhymeotron" class="widget">
+        <div style="padding-bottom:8px">The complexity of your rhyme is O(<span id="complexity">undefined</span>)</div>
+        <div style="padding-bottom:8px">
+            <label for="require-rhyme">Require Perfect Rhyme </label>
             <input type="checkbox" id="require-rhyme" name="require-rhyme" value="no" onchange="populateMatches(event)">
         </div>
-        <label for="stress-matching">Stress matching:</label>
-        <select id="stress-matching" name="stress-matching" onchange="populateMatches(event)">
-            <option value="require" selected>Require</option>
-            <option value="ignore">Ignore</option>
-            <option value="anti-match">Anti-match</option>
-        </select>
-        <div style="padding-top:5px">
+        <div style="padding-bottom:8px">
+            <label for="semantic-weight">Semantic Matching Weight</label>
+            <input type="range" id="semantic-weight" name="semantic-weight" min="0" max="1" step=".01" value="0" onchange="throttle(populateMatches.bind(window,event), 250)()" style="vertical-align: middle"/>
+            <div style="font-size: 10pt; color: #CCC;">Low values give more weight to phonetic matching. High values give more weight to semantic matching.</div>
+        </div>
+        <div style="padding-bottom:8px">
+            <label for="stress-matching">Stress matching</label>
+            <select id="stress-matching" name="stress-matching" onchange="populateMatches(event)">
+                <option value="require" selected>Require</option>
+                <option value="ignore">Ignore (very slow when using semantic matching)</option>
+                <option value="anti-match">Anti-match</option>
+            </select>
+        </div>
+        <div style="padding-bottom:8px">
             <label for="stress-matching">Word to match:</label>
-            <input id="query-word" name="query-word" type="text" value="monitor" oninput="populateMatches(event)">
+            <input id="query-word" name="query-word" type="text" value="oil" oninput="populateMatches(event)">
         </div>
         <div id="matches" style="height: 400px; overflow: scroll; width: 300px;">
     </div>
     </div>
+    <div style="margin-top:30px; font-size: 10pt; color: #BBB;">
+        <div>Pronunciation dictionary from <a href="http://www.speech.cs.cmu.edu/cgi-bin/cmudict">http://www.speech.cs.cmu.edu/cgi-bin/cmudict</a></div>
+        <div>GLoVe embeddings from glove.twitter.27B.zip on <a href="https://nlp.stanford.edu/projects/glove/">https://nlp.stanford.edu/projects/glove/</a></div>
+        <div>Both datasets were modified to only include words common to both, and any uncommon words have been dropped.</div>
+        <p><a target="_blank" href="https://icons8.com/icon/ogntqjowBEa3/quill-with-ink">quill</a> icon by <a target="_blank" href="https://icons8.com">Icons8</a></p>
+    </div>
     <script>
         document.addEventListener('DOMContentLoaded', async () => {
             await loadWords();
-            
+            await loadGlove();
+            document.getElementById('phonemeTable').innerHTML = 
+                "<thead><tr><th>Property</th>" + phonemes.map(x=>"<th>" + x + "</th>").join('') + "<tr></thead>" +
+                "<tbody>" + Object.entries(properties).map(x=>"<tr><td>" + x[0] +"</td>" + x[1].split('').map(x=>"<td>"+x+"</td>").join('') + "</tr>").join('') + "</tbody>";
+            semanticMatches();
             showPerfectRhymes();
             drawHeatmap();
             toStress();
@@ -148,12 +166,7 @@
             populateMatches();
 
             
-            // TODO are the vectors correct? why is ʒ missing properties?
-    
-            // TODO add a checkbox for enforce rhyme
             // TODO add a checkbox to match exact, start, end, or anywhere
-            // TODO Remove the most uncommon words
-           
             // TODO tooltips for each IPA sound
         });
     </script>

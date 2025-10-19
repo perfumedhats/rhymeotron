@@ -1,3 +1,18 @@
+
+/**
+ * @param {Object} x - An object containing a glove vector
+ * @param {Object} y - An object containing a glove vector
+ */
+function cosineSimilarity(x,y) {
+    const vector1 = x.vector;
+    const vector2 = y.vector;
+    let acc = 0;
+    for (let i = 0; i < 25; i++) {
+        acc += vector1[i] * vector2[i];
+    }
+    return acc / (x.magnitude * y.magnitude);
+}
+
 function comparePhonemes (x, y) {
     // Phoneme vectors have one of three values. + for present, - for absent, and X for unapplicable.
     // This calculates a vector of where two phonemes are equal, then returns the average of that vector
@@ -27,15 +42,32 @@ function lookupWord (target) {
 
 function compareWords (word1, word2) {
     // TODO compare average with harmonic mean
-    range = -1 * Math.min(word1.phonemes.length, word2.phonemes.length);
-    phonemes1 = word1.phonemes.slice(range);
-    phonemes2 = word2.phonemes.slice(range);
-    return average(phonemes1.map((x,i)=>lookup[x][phonemes2[i]]));
+    const range = -1 * Math.min(word1.phonemes.length, word2.phonemes.length);
+    const phonemes1 = word1.phonemes.slice(range);
+    const phonemes2 = word2.phonemes.slice(range);
+
+    // Without this, light would match lite and blight equally
+    const lengthPenalty = .02 * Math.abs(word1.phonemes.length - word2.phonemes.length);
+    return average(phonemes1.map((x,i)=>lookup[x][phonemes2[i]])) - lengthPenalty;
 }
 
-// Return words sorted by overall similarity
-function similarWords (target, words) {
-    return words.map(x=>[x.word, compareWords(target, x)]).sort((x,y) => y[1] - x[1]);
+/**
+ * Return words sorted by overall similarity
+ * @param {float} semanticWeight - How heavily to weigh semantic similarity in the overall score
+ */
+function similarWords (target, words, semanticWeight) {
+    const targetEmbedding = glove[target.word];
+    return words.map(function (x) {
+        let score = compareWords(target, x);
+        
+        if (semanticWeight) {
+            let embedding = glove[x.word];
+            if (!embedding) return [x.word, 0];
+            score = (score * (1 - semanticWeight)) + cosineSimilarity(targetEmbedding, embedding) * semanticWeight;
+        }
+
+        return [x.word, score];
+    }).sort((x,y) => y[1] - x[1]);
 }
 
 function throttle(fn, limit) {

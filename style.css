@@ -9,7 +9,7 @@ body {
     border-radius: 8px;
 }
 #column {
-    max-width:800px;
+    max-width:925px;
     margin: 0 auto;
 }
 
@@ -32,7 +32,12 @@ a:hover, a:focus {
     border: 1px solid #999;
 }
 
-#phonemeTable th, #phonemeTable td {
+#phonemeTable th {
+    border: 1px solid #999;
+    padding: 1px 0px;
+}
+
+#phonemeTable td {
     border-right: 1px solid #999;
     border-left: 1px solid #999;
     padding: 1px 3px;

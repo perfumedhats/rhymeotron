@@ -9,11 +9,11 @@ const drawHeatmap = function() {
 
     const svg = d3.select("#heatmap")
         .append("svg")
-        .attr("width", 800)
-        .attr("height", 800);
+        .attr("width", 900)
+        .attr("height", 650);
 
-    const x = d3.scaleBand().domain(phonemes).range([0, 800]).padding(0.05);
-    const y = d3.scaleBand().domain(phonemes).range([0, 800]).padding(0.05);
+    const x = d3.scaleBand().domain(phonemes).range([0, 850]).padding(0.05);
+    const y = d3.scaleBand().domain(phonemes).range([0, 600]).padding(0.05);
 
     const color = d3.scaleSequential()
         .domain([0, d3.max(heatmapData, d => d.value)])   // [min, max] if you prefer: d3.extent(...)
