@@ -8,42 +8,49 @@ let phonemes =
     "ɑ æ ʌ ɔ aʊ ə ɚ aɪ ɛ ɝ eɪ ɪ ɨ i oʊ ɔɪ ʊ u b tʃ d ð ɾ l̩ m̩ n̩ f ɡ h dʒ k l m n ŋ p ʔ ɹ s ʃ t θ v w ʍ j z ʒ".split(' ');
 
 // Some vectors should be worth more than others. The difference between a plosive and continuant seems more significant than front vs back.
-let properties = [
+let properties = {
     // General
-    "- + - - +  - - +  - - +  - - - +  +  - - - -  - - - - - - - - - -  - - - - - - - - - - - - - - - - - -", // dipthong
-    "+ + + + +  + + +  + + +  + + + +  +  + + - -  - - - + + + - - - -  - + + + - - - + - - - - - + - + - -", // sonorant
-    "+ + + + +  + + +  + + +  + + + +  +  + + + -  + + + + + + - + - +  - + + + + - - + - - - - + + - + + +", // voice
-    "- - - - -  - + -  - + -  - - - -  -  - - - -  - - - - - - - - - -  - - - - - - - + - - - - - - - - - -", // rhotic
+    "dipthong":    "- + - - +  - - +  - - +  - - - +  +  - - - -  - - - - - - - - - -  - - - - - - - - - - - - - - - - - -",
+    "sonorant":    "+ + + + +  + + +  + + +  + + + +  +  + + - -  - - - + + + - - - -  - + + + - - - + - - - - - + - + - -",
+    "voiced":      "+ + + + +  + + +  + + +  + + + +  +  + + + -  + + + + + + - + - +  - + + + + - - + - - - - + + - + + +",
+    "rhotic":      "- - - - -  - + -  - + -  - - - -  -  - - - -  - - - - - - - - - -  - - - - - - - + - - - - - - - - - -",
 
     // Place of articulation
-    // subcategoriest could be added https://en.wikipedia.org/wiki/Place_of_articulation
-    "- - - + +  - - -  - - -  - - - +  x  + + + -  - - - - + - + - - -  - - + - - + - - - - - - + + - - - -", // labial
-    "- - - - -  - - -  - - -  - - - -  -  - - - +  + + + + - + - - - +  - + - + - - - + + + + + - - - - + +", // coronal
-    "+ + + + +  + + +  + + +  + + + +  +  + + - -  - - - - - - - + + -  + - - - + - - - - - - - - + + + - -", // dorsal
+    // subcategories could be added https://en.wikipedia.org/wiki/Place_of_articulation
+    "labial":      "- - - + +  - - -  - - -  - - - +  x  + + + -  - - - - + - + - - -  - - + - - + - - - - - - + + - - - -",
+    "coronal":     "- - - - -  - - -  - - -  - - - -  -  - - - +  + + + + - + - - - +  - + - + - - - + + + + + - - - - + +",
+    "dorsal":      "+ + + + +  + + +  + + +  + + + +  +  + + - -  - - - - - - - + + -  + - - - + - - - - - - - - + + + - -",
 
-    // // Consonant exclusive (airflow)
-    "- - - - -  - - -  - - -  - - - -  -  - - - +  - - - - - - - - - +  - - - - - - - - - - - - - - - - - -", // plosive
-    "- - - - -  - - -  - - -  - - - -  -  - - + -  + - - - - - - + - +  + - - - - + + - - - + - - - - - - -", // affricative
-    "- - - - -  - - -  - - -  - - - -  -  - - p a  p - - - - - - p - a  p - - - - p p - - - p - - - - - - -", // plosive or affricative. Combined since they're mutually exclusive
-    "- - - - -  - - -  - - -  - - - -  -  - - - +  - + - - - - + - - -  - - - - - - - - + + - + + - + - + +", // fricative
-    "- - - - -  - - -  - - -  - - - -  -  - - - -  - - - - + + - - - -  - - + + - - - - - - - - - - - - - -", // nasal
+    // Consonant exclusive (airflow). Note that this is a single categorical variable "manner", which is one-hot encoded
+    // In effect, this one-hot encoding adds more weight to the "manner" variable, since each dimension is equally weighted
+    "plosive":     "- - - - -  - - -  - - -  - - - -  -  - - - -  - - - - - - - + - -  + - - - - - - - - - - - - - - - - -",
+    "affricative": "- - - - -  - - -  - - -  - - - -  -  - - + -  + - - - - - - - - +  - - - - - + + - - - + - - - - - - -",
+    "fricative":   "- - - - -  - - -  - - -  - - - -  -  - - - +  - + - - - - + - - -  - - - - - - - - + + - + + - + - + +",
+    "nasal":       "- - - - -  - - -  - - -  - - - -  -  - - - -  - - - - + + - - - -  - - + + - - - - - - - - - - - - - -",
 
     // Vowel exclusive
-    "- - - + +  - - -  - - -  - - - +  x  + + X X  X X X X X X X X X X  X X X X X X X X X + X X X + + X X +", // round (or partially in the case of ʃ and ʒ)
-    "- - - - x  - - x  - - x  + + + x  x  + + X X  X X X X X X X X X X  X X X X X X X X X X X X X X X X X X", // high
-    "+ + - - x  - - x  - - -  - - - -  -  - - X X  X X X X X X X X X X  X X X X X X X X X X X X X X X X X X", // low
-    "+ - + + +  + + x  - + -  - + - +  x  + + X X  X X X X X X X X X X  X X X X X X X X X X X X X X X X X X", // back
-    "+ - - + +  r r +  - + +  - r + +  +  - + X X  X X X X X X X X X X  X X X X X X X X X X X X X X X X X X", // tense (r for reduced)
+    // In the case of ʃ and ʒ, these are only partially round
+    "round":       "- - - + +  - - -  - - -  - - - +  x  + + X X  X X X X X X X X X X  X X X X X X X X X + X X X + + X X +",
+    "high":        "- - - - x  - - x  - - x  + + + x  x  + + X X  X X X X X X X X X X  X X X X X X X X X X X X X X X X X X",
+    "low":         "+ + - - x  - - x  - - -  - - - -  -  - - X X  X X X X X X X X X X  X X X X X X X X X X X X X X X X X X",
+    "back":        "+ - + + +  + + x  - + -  - + - +  x  + + X X  X X X X X X X X X X  X X X X X X X X X X X X X X X X X X",
+    "tense":       "+ - - + +  r r +  - + +  - r + +  +  - + X X  X X X X X X X X X X  X X X X X X X X X X X X X X X X X X",
     
-
     // These would duplicate other fields, so are omitted
-    // "- - - - -  - - -  - - -  - - - -  -  - - + +  + + + + + + + + - +  + + + + + + + + + + + + + + + + + +", // consonantal
-    // "+ + + + +  + + +  + + +  + + + +  +  + + - -  - - - - - - - - - -  - - - - - - - - - - - - - - - - - -", // vowel
-    ].map(x=>x.replace(/ /g,''));
+    // "consonant": "- - - - -  - - -  - - -  - - - -  -  - - + +  + + + + + + + + - +  + + + + + + + + + + + + + + + + + +",
+    // "vowel":     "+ + + + +  + + +  + + +  + + + +  +  + + - -  - - - - - - - - - -  - - - - - - - - - - - - - - - - - -",
+    };
+
+// Remove the spaces from properties, since they're only there to help code legibility and interfere with comparing vectors
+properties = Object.fromEntries(
+    Object.entries(properties).map(
+        (x,y)=>[x[0], x[1].replace(/ /g, '')]
+    )
+) 
 
 // Flip properties to be a vector for each phoneme
 let vectors = phonemes.reduce((dict, phoneme, i) => {
-    dict[phoneme] = properties.map(x=>x[i]);
+    dict[phoneme] = Object.values(properties).map(x=>x[i]);
     return dict;
 }, {});
 
@@ -197,7 +204,7 @@ async function loadWords() {
         return {
             "word": word,
             "phonemes": phonemes,
-            "stress": stress, 
+            "stress": stress.join(''), 
             "stressSimple": stressSimple,
             "rhyme": rhyme,
         }
