@@ -12,7 +12,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8" />
-    <title>Vestiges of Caesura</title>
+    <title>AI Rhyming</title>
     <script src="d3.v7.min.js" defer></script>
     <script src="utility.js" defer></script>
     <script src="phonology.js" defer></script>
@@ -82,7 +82,7 @@
     <p>The following heatmap shows how similar every pair is. The two large clusters are vowels and consonants.</p>
     <div class="widget">
         <div id="heatmap-tooltip">Mouse over a cell to get the details here.</div>
-        <div id="heatmap"></div>
+        <div id="heatmap">This widget is loading a large dataset, and will be ready shortly</div>
     </div>
     <p>This chart also shows how <code>/j/</code> and <code>/w/</code>, the semivowels, sit in between vowels and consonants.</p>
     <p>To calculate find all near rhymes, we need to compare each pair of phonemes between each pair of words, making this rhyme O(n&nbsp;*&nbsp;m), where n is the number of words in our dictionary, and m is the mean number of phonemes in a word.</p>
@@ -106,7 +106,7 @@
         <div>Enter a word here to find the 100 most similar words</div>
         <div style="padding: 5px;">
             <input id="semantic-lookup" type="text" value="computer" oninput="semanticMatches(event)">
-            <div id="semantic-matches" style="height: 400px; overflow: scroll; width: 300px;"></div>
+            <div id="semantic-matches" style="height: 400px; overflow: scroll; width: 300px;">This widget is loading a large dataset, and will be ready shortly</div>
         </div>
     </div>
 
@@ -143,8 +143,8 @@
             <input id="query-word" name="query-word" type="text" value="oil" oninput="populateMatches(event)">
         </div>
         <div id="matches" style="height: 400px; overflow: scroll; width: 300px;">
-    </div>
-    </div>
+            This widget is loading a large dataset, and will be ready shortly
+        </div>
     <div style="margin-top:30px; font-size: 10pt; color: #BBB;">
         <div>Pronunciation dictionary from <a href="http://www.speech.cs.cmu.edu/cgi-bin/cmudict">http://www.speech.cs.cmu.edu/cgi-bin/cmudict</a></div>
         <div>GLoVe embeddings from glove.twitter.27B.zip on <a href="https://nlp.stanford.edu/projects/glove/">https://nlp.stanford.edu/projects/glove/</a></div>
@@ -164,10 +164,6 @@
             toStress();
             toIPA();
             populateMatches();
-
-            
-            // TODO add a checkbox to match exact, start, end, or anywhere
-            // TODO tooltips for each IPA sound
         });
     </script>
 </div>

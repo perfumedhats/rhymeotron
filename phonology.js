@@ -1,11 +1,9 @@
-// Now we represent the sounds in English using feature vectors.
 // Sounds are labelled using their International Phonetic Alphabet (IPA) symbols.
 
 // A feature vector is conceptually the same an embedding in machine learning,
 // except each dimension represents a specific feature, instead of the dimensions being generated during training. 
-// This isn't complete. Some of the IPA symbols common in english, like ɚ and ʔ, aren't represented in the pronunciation dictionary
-let phonemes =
-    "ɑ æ ʌ ɔ aʊ ə ɚ aɪ ɛ ɝ eɪ ɪ ɨ i oʊ ɔɪ ʊ u b tʃ d ð ɾ l̩ m̩ n̩ f ɡ h dʒ k l m n ŋ p ʔ ɹ s ʃ t θ v w ʍ j z ʒ".split(' ');
+// This isn't complete. Some of the IPA symbols common in english, like ɚ and ʔ, aren't included in the pronunciation dictionary.
+let phonemes =     "ɑ æ ʌ ɔ aʊ ə ɚ aɪ ɛ ɝ eɪ ɪ ɨ i oʊ ɔɪ ʊ u b tʃ d ð ɾ l̩ m̩ n̩ f ɡ h dʒ k l m n ŋ p ʔ ɹ s ʃ t θ v w ʍ j z ʒ".split(' ');
 
 // Some vectors should be worth more than others. The difference between a plosive and continuant seems more significant than front vs back.
 let properties = {
@@ -82,7 +80,6 @@ IPADescription = {
     "ɔɪ": "oy as in boy",
     "ʊ":  "oo as in book",
     "u":  "oo as in boot",
-    // "ʉ":  "u as in dude", // Unused
     "b":  "b as in buy",
     "tʃ": "ch as in chain",
     "d":  "d as in dog",
@@ -168,7 +165,6 @@ arpabetToIP = {
     "Z":   "z",   // zoo
     "ZH":  "ʒ",   // pleasure
 }
-// TODO plot a histogram of phoneme similarities
 
 phonology = {
     "words": null,
@@ -196,7 +192,7 @@ async function loadWords() {
             .map(x=>x.replace(/[012]$/,''))
             .map(x=>arpabetToIP[x]);
 
-        // These get joined together so the stress of different words can be compared for equality quickly
+        // These get joined together, so the stress of different words can be compared for equality quickly
         const stressSimple = stress.filter(x=> x != "-").join('');
 
         const rhyme = phonemes.slice(stress.lastIndexOf("1")).join('');
@@ -209,8 +205,6 @@ async function loadWords() {
             "rhyme": rhyme,
         }
     })
-
-
 
     if (!res.ok) {
         throw new Error(`Failed to load word list: ${response.status} ${response.statusText}`);
